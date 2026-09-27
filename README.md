@@ -23,11 +23,13 @@ TBD (link to Overleaf or /report)
 
 ## Structure
 - `journal/`: one dated entry per week (`YYYY-MM-DD.md`)
-- `report/`: paper drafts
+- `report/`: paper drafts. Commit every draft, not just the final one
+- `src/`: Python code (data loading, model training, SHAP analysis)
+- `prompts/`: log of AI prompts used, as required alongside the code
 
-## Deadlines
-- Presentation: 9 Oct 2026
-- Paper + journal: 23 Oct 2026
+## Deliverables
+- Presentation (slide deck): 9 Oct 2026
+- Paper (3 pages, fixed format) + journal: 23 Oct 2026
 
 ---
 *README drafted with AI assistance.*
