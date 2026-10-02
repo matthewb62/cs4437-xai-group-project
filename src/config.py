@@ -41,7 +41,7 @@ PSI_BINS = 10
 MAX_GAP_HOURS = 3
 
 # Leakage-safe lags, in days before the delivery day D
-GAS_LAG_DAYS = 2
+AUCTION_CLOSE_HOUR = 12   # gas: same clock hour from the 24 h before this hour on D-1
 OIL_LAG_DAYS = 2
 OIL_CHANGE_DAYS = 30
 TEMP_LEAD_DAYS = 2
