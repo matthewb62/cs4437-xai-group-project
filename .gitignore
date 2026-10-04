@@ -12,3 +12,8 @@ venv/
 
 # OS
 .DS_Store
+
+models/SAMPLE*
+results/*SAMPLE*
+figures/*SAMPLE*
+.venv/
