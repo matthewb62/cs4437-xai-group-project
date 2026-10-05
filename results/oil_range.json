@@ -1,0 +1,12 @@
+{
+  "largest_30d_oil_change_training_pct": 21.37,
+  "range_30d_oil_change_training_pct": [
+    -20.32,
+    21.37
+  ],
+  "largest_30d_oil_change_test_pct": 77.64,
+  "range_30d_oil_change_test_pct": [
+    -32.56,
+    77.64
+  ]
+}

@@ -281,6 +281,46 @@ def analyse_model(name, table, windows, model_path, real):
 
 # ---------------------------------------------------------------- O3, O4 summary
 
+OUTCOMES = {
+    "tau_first": "explanation drift warned first",
+    "mae_first": "error warned first",
+    "same": "both warned in the same window",
+    "neither": "neither crossed",
+}
+
+
+def outcome(found):
+    """O3: which of the four outcomes applies, from the tau and MAE crossings.
+
+    The method doc's results table is not in the repo, so these are the four
+    agreed labels. A metric that crossed while the other never did counts as
+    having warned first.
+    """
+    dates = found["dates"]
+    if dates["tau"] is None and dates["mae"] is None:
+        return "neither"
+    if dates["mae"] is None:
+        return "tau_first"
+    if dates["tau"] is None:
+        return "mae_first"
+    if found["lead_mae"] > 0:
+        return "tau_first"
+    if found["lead_mae"] < 0:
+        return "mae_first"
+    return "same"
+
+
+def outcome_lines(found, two):
+    """The O3 label, from the single-window crossings, with the A14 check beside it."""
+    single_label, two_label = outcome(found), outcome(two)
+    lines = [f"**Outcome (O3): {OUTCOMES[single_label]}.** "
+             f"The label follows the single-window crossings (A11), which are the main "
+             f"result. Requiring two windows in a row (A14) gives: {OUTCOMES[two_label]}."]
+    if single_label != two_label:
+        lines.append("The two disagree, so the outcome does not survive the robustness check.")
+    return [" ".join(lines)]
+
+
 def ordering(found):
     """Plain statement of which warning came first. Not the method doc's outcome label."""
     dates = found["dates"]
@@ -361,6 +401,8 @@ def write_summary(analysed, real):
             f"| MAE (EUR/MWh) | {t['mae_mean']:.3f} | {t['mae_sd']:.3f} | {show_date(dates['mae'])} | {show_lead(found['crossings']['lead_mae'])} |",
             f"| PSI (mean) | {t['psi_mean']:.4f} | {t['psi_sd']:.4f} | {show_date(dates['psi'])} | {show_lead(found['crossings']['lead_psi'])} |",
             f"| PSI, any feature at {PSI_CUTOFF} | | | {show_date(dates['psi_cutoff'])} | |",
+            "",
+            *outcome_lines(found["crossings"], two),
             "",
             f"Ordering: {ordering(found['crossings'])}",
             "",

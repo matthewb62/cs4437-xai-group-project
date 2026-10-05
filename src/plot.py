@@ -79,9 +79,11 @@ def plot_z(results, model, real):
                 marker=marker, markersize=8, markerfacecolor=SURFACE, markeredgecolor=colour,
                 markeredgewidth=2, zorder=4)
         ax.plot(results.loc[warned, "window_start"], results.loc[warned, column], linestyle="none",
-                marker=marker, markersize=9, color=colour, zorder=4, label=label)
-        if not warned.any():   # still needs a legend entry
-            ax.plot([], [], linestyle="none", marker=marker, markersize=9, color=colour, label=label)
+                marker=marker, markersize=9, color=colour, zorder=4)
+        # One legend entry per metric, drawn hollow on purpose: filled is reserved
+        # for a window over the warning line, so the key must not look warned.
+        ax.plot([], [], linestyle="none", marker=marker, markersize=9, markerfacecolor=SURFACE,
+                markeredgecolor=colour, markeredgewidth=2, label=label)
 
     ax.axhline(SD_MULTIPLIER, color=INK_SECONDARY, linewidth=1.5, linestyle=(0, (5, 4)), zorder=2)
     ax.axhline(0, color=GRID, linewidth=1.2, zorder=1)
@@ -98,7 +100,7 @@ def plot_z(results, model, real):
         scale_note = ""
     low = min(results[z_columns].min().min(), -SD_MULTIPLIER) - 0.5
     ax.set_ylim(low, highest * 1.6 if highest > LOG_SWITCH else max(highest, SD_MULTIPLIER) + 1.5)
-    ax.set_ylabel(f"Standard deviations from baseline mean{scale_note}\nup = more drift",
+    ax.set_ylabel(f"SDs from baseline (up = more drift){scale_note}",
                   fontsize=13, color=INK_SECONDARY)
 
     date_axis(ax)
@@ -157,7 +159,10 @@ def plot_raw(results, model, real):
         ax.set_xlim(baseline_start - pd.Timedelta(days=5), x_end)
         ax.text(x_end, line, f" {SD_MULTIPLIER:g} SD warning line", ha="left", va="center",
                 fontsize=12, color=INK_SECONDARY, clip_on=False)
-    axes[0].set_ylim(-1, 1.05)
+    # Tau sits near the top of its -1..1 range, so zoom in on where it actually
+    # moves. The limit still opens out if a window or the warning line falls lower.
+    tau_line = thresholds["tau_mean"] - SD_MULTIPLIER * thresholds["tau_sd"]
+    axes[0].set_ylim(min(0.5, min(results["tau"].min(), tau_line) - 0.05), 1.02)
     top = axes[0].get_ylim()[1]
     note = dict(fontsize=12, color=INK_SECONDARY, va="bottom")
     axes[0].text(baseline_start + (shock - baseline_start) / 2, top, "Baseline", ha="center", **note)

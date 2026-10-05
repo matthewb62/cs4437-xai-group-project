@@ -1,0 +1,14 @@
+{
+  "validation_window": "2025-10-01..2025-10-31",
+  "mae_blind_eur_per_mwh": 14.461,
+  "mae_oil_eur_per_mwh": 14.872,
+  "mae_naive_eur_per_mwh": 43.475,
+  "mae_blind_training_eur_per_mwh": 10.923,
+  "mae_oil_training_eur_per_mwh": 11.122,
+  "blind_validation_minus_training": 3.539,
+  "oil_validation_minus_training": 3.75,
+  "blind_better_than_naive_pct": 66.7,
+  "oil_better_than_naive_pct": 65.8,
+  "training_rows": 14860,
+  "validation_rows": 745
+}
