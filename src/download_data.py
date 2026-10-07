@@ -5,7 +5,8 @@ Use this script to get the data. Don't download files manually.
 Do not commit the data/ folder.
 
 The electricity series come from SMARD (Bundesnetzagentur), the temperature
-from Open-Meteo and Brent from FRED.
+from Open-Meteo and Brent from FRED. Temperature comes twice: the 2-day-ahead
+forecast from January 2024, and ERA5 reanalysis for the years before it.
 
 Each series is saved as received: one CSV per series, original timestamps,
 original resolution. Cleaning happens in clean_data.py.
@@ -27,15 +28,21 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import requests
 
-from config import CITIES, DOWNLOAD_END, DOWNLOAD_START, RAW_DIR, TIMEZONE
+from config import (
+    CITIES, DOWNLOAD_END, DOWNLOAD_START, RAW_DIR, TEMP_FORECAST_START,
+    TEMP_REANALYSIS_END, TIMEZONE,
+)
 
 SMARD = "https://www.smard.de/app/chart_data"
 OPEN_METEO = "https://previous-runs-api.open-meteo.com/v1/forecast"
+OPEN_METEO_ARCHIVE = "https://archive-api.open-meteo.com/v1/archive"
 FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv"
 
 FORECAST_TYPES = ["load", "solar", "wind_onshore", "wind_offshore"]
 TEMP_VARIABLE = "temperature_2m_previous_day2"
 TEMP_MODEL = "icon_seamless"
+REANALYSIS_VARIABLE = "temperature_2m"
+REANALYSIS_MODEL = "era5"
 
 # SMARD serves one JSON file per filter, region, resolution and week.
 #
@@ -71,6 +78,7 @@ SERIES_FILES = {
     **{f"forecast_{t}.csv": ("unix_seconds", "s") for t in FORECAST_TYPES},
     "generation_gas.csv": ("unix_seconds", "s"),
     **{f"temperature_{c}.csv": ("time_utc", None) for c in CITIES},
+    **{f"temperature_era5_{c}.csv": ("time_utc", None) for c in CITIES},
     "brent.csv": ("observation_date", None),
 }
 
@@ -84,6 +92,11 @@ SOURCES = {
         "url": f"{OPEN_METEO}?hourly={TEMP_VARIABLE}&models={TEMP_MODEL}",
         "licence": "CC BY 4.0, Open-Meteo.com",
     },
+    "open-meteo-era5": {
+        "url": f"{OPEN_METEO_ARCHIVE}?hourly={REANALYSIS_VARIABLE}&models={REANALYSIS_MODEL}",
+        "licence": "CC BY 4.0, Open-Meteo.com; contains modified Copernicus Climate "
+                   "Change Service information (ERA5)",
+    },
     "fred": {
         "url": f"{FRED_CSV}?id=DCOILBRENTEU",
         "licence": "Public domain (U.S. Energy Information Administration via FRED); citation requested",
@@ -95,7 +108,7 @@ FINAL_AFTER_DAYS = 7              # a chunk that ended this long ago is not refe
 
 TIMEOUT = 120
 # SMARD serves static JSON and publishes no rate limit, but a full run is about
-# 900 week files, so it still gets a pause between requests.
+# 2,500 week files, so it still gets a pause between requests.
 SMARD_PAUSE_SECONDS = 0.25
 MAX_RETRIES = 5
 # 429 is a rate limit; 502, 503 and 504 are what a source returns while it is
@@ -139,7 +152,7 @@ def _get(url, params, label, endpoint=None, pause=0.0):
             resp = requests.get(url, params=params, timeout=TIMEOUT)
         except requests.RequestException as e:
             # A dropped connection or a read timeout is transient, and over the
-            # ~900 week files of a full run one is close to certain.
+            # ~2,500 week files of a full run one is close to certain.
             if attempt == MAX_RETRIES:
                 raise DownloadError(f"{label}: request failed ({e})") from e
             wait = BACKOFF_SECONDS * 2 ** (attempt - 1)
@@ -303,34 +316,55 @@ def download_gas():
     _write_csv("generation_gas.csv", ["unix_seconds", "gas"], rows, label)
 
 
+def _open_meteo_city(url, variable, model, name, label, lat, lon, start, end):
+    """One city's hourly series from an Open-Meteo endpoint, a calendar year per request."""
+    rows = []
+    for chunk_start, chunk_end in _year_chunks(start, end):
+        chunk_label = f"{label} {chunk_start}..{chunk_end}"
+
+        def fetch(chunk_start=chunk_start, chunk_end=chunk_end, chunk_label=chunk_label):
+            print(f"  fetching {chunk_label}")
+            params = {"latitude": lat, "longitude": lon, "hourly": variable,
+                      "models": model, "start_date": chunk_start,
+                      "end_date": chunk_end, "timezone": "GMT"}
+            hourly = _get(url, params, chunk_label).json().get("hourly") or {}
+            stamps = hourly.get("time") or []
+            values = hourly.get(variable) or []
+            if not stamps:
+                raise DownloadError(f"{chunk_label}: empty response")
+            if len(stamps) != len(values):
+                raise DownloadError(
+                    f"{chunk_label}: {len(stamps)} timestamps but {len(values)} values")
+            return zip(stamps, values)
+
+        rows.extend(_cached_chunk(name, chunk_start, chunk_end, fetch))
+    if all(value is None for _, value in rows):
+        raise DownloadError(f"{label} {start}..{end}: every value is missing")
+    _write_csv(f"{name}.csv", ["time_utc", variable], rows, f"{label} {start}..{end}")
+
+
 def download_temperature():
+    """The 2-day-ahead forecast, from the start of its archive in January 2024.
+
+    The archive's first weeks are null, which clean_data.py fills with ERA5.
+    """
+    start = max(DOWNLOAD_START, TEMP_FORECAST_START)
     for city, (lat, lon, _weight) in CITIES.items():
-        name = f"temperature_{city}"
-        rows = []
-        for start, end in _year_chunks(DOWNLOAD_START, DOWNLOAD_END):
-            chunk_label = f"temperature {city} {start}..{end}"
+        _open_meteo_city(OPEN_METEO, TEMP_VARIABLE, TEMP_MODEL, f"temperature_{city}",
+                         f"temperature {city}", lat, lon, start, DOWNLOAD_END)
 
-            def fetch(start=start, end=end, chunk_label=chunk_label):
-                print(f"  fetching {chunk_label}")
-                params = {"latitude": lat, "longitude": lon, "hourly": TEMP_VARIABLE,
-                          "models": TEMP_MODEL, "start_date": start,
-                          "end_date": end, "timezone": "GMT"}
-                hourly = _get(OPEN_METEO, params, chunk_label).json().get("hourly") or {}
-                stamps = hourly.get("time") or []
-                values = hourly.get(TEMP_VARIABLE) or []
-                if not stamps:
-                    raise DownloadError(f"{chunk_label}: empty response")
-                if len(stamps) != len(values):
-                    raise DownloadError(
-                        f"{chunk_label}: {len(stamps)} timestamps but {len(values)} values")
-                return zip(stamps, values)
 
-            rows.extend(_cached_chunk(name, start, end, fetch))
-        # The archive begins in January 2024, so early chunks can be all null.
-        label = f"temperature {city} {DOWNLOAD_START}..{DOWNLOAD_END}"
-        if all(value is None for _, value in rows):
-            raise DownloadError(f"{label}: every value is missing")
-        _write_csv(f"{name}.csv", ["time_utc", TEMP_VARIABLE], rows, label)
+def download_temperature_reanalysis():
+    """ERA5 reanalysis, the observed temperature, for the years before the forecast.
+
+    It runs a year past the forecast's start so the two can be compared where
+    both exist. clean_data.py only uses it before the forecast begins.
+    """
+    end = min(DOWNLOAD_END, TEMP_REANALYSIS_END)
+    for city, (lat, lon, _weight) in CITIES.items():
+        _open_meteo_city(OPEN_METEO_ARCHIVE, REANALYSIS_VARIABLE, REANALYSIS_MODEL,
+                         f"temperature_era5_{city}", f"temperature ERA5 {city}",
+                         lat, lon, DOWNLOAD_START, end)
 
 
 def download_brent():
@@ -368,6 +402,8 @@ def write_manifest():
     for filename in SERIES_FILES:
         if filename == "brent.csv":
             source = SOURCES["fred"]
+        elif filename.startswith("temperature_era5_"):
+            source = SOURCES["open-meteo-era5"]
         elif filename.startswith("temperature_"):
             source = SOURCES["open-meteo"]
         else:
@@ -390,6 +426,7 @@ def main():
     download_forecasts()
     download_gas()
     download_temperature()
+    download_temperature_reanalysis()
     download_brent()
     print_summary()
     write_manifest()

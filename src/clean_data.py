@@ -11,7 +11,9 @@ What it does, in order:
   C3  short gaps in the input series are interpolated, longer ones are left
       missing and reported; the price is never filled, because it is the target
   C4  prices are passed through untouched, negative values and spikes included
-  C5  the five city temperature forecasts become one population-weighted column
+  C5  the five city temperature forecasts become one population-weighted column;
+      before the forecast archive begins, the same weighting of ERA5
+      reanalysis stands in for it
   C6  Brent is carried forward over weekends and holidays
 
 Rows are never dropped here: the table keeps a complete hourly index so that C2
@@ -124,7 +126,7 @@ def fill_short_gaps(series, max_gap):
     """C3: interpolate runs of at most max_gap missing hours, leave longer runs.
 
     Only gaps inside the series' own coverage are filled. Hours before a series
-    starts, such as temperature before its January 2024 archive, are not gaps.
+    starts, such as the price before the first complete day, are not gaps.
     Returns the series, the hours filled and the hours left in longer gaps.
     """
     covered = series.notna()
@@ -155,6 +157,31 @@ def weighted_temperature(city_series, weights):
     share = share / share.sum()
     weighted = (frame[share.index] * share).sum(axis=1)
     return weighted.where(frame.notna().all(axis=1))
+
+
+def city_temperature(hourly, prefix, align=lambda series: series):
+    """C5 applied to the five city series in `hourly` whose label starts with prefix."""
+    return weighted_temperature(
+        {city: align(hourly[f"{prefix}{city}"]) for city in CITIES},
+        {city: weight for city, (_lat, _lon, weight) in CITIES.items()},
+    )
+
+
+def splice_temperature(forecast, reanalysis):
+    """C5: the forecast where its archive has begun, ERA5 reanalysis before that.
+
+    The reanalysis only fills the hours before the forecast's first value. A
+    gap after that stays a gap, so the validation, baseline and test periods
+    only ever see a temperature that was forecast before the auction.
+    Returns the spliced series and the first hour taken from the forecast.
+    """
+    if not forecast.notna().any():
+        raise CleaningError("The temperature forecast has no values at all")
+    first = forecast.first_valid_index()
+    spliced = forecast.copy()
+    before = spliced.index < first
+    spliced[before] = reanalysis.reindex(spliced.index)[before]
+    return spliced, first
 
 
 def daily_oil_close(brent, days):
@@ -190,6 +217,8 @@ def load_hourly_inputs():
     take(GAS_FILE, GAS)
     for city in CITIES:
         take(f"temperature_{city}.csv", f"temperature_{city}")
+    for city in CITIES:
+        take(f"temperature_era5_{city}.csv", f"temperature_era5_{city}")
     return hourly, report
 
 
@@ -240,10 +269,9 @@ def assemble(hourly, brent):
     table[WIND] = (on_index(hourly["forecast_wind_onshore"])
                    + on_index(hourly["forecast_wind_offshore"]))
     table[GAS] = on_index(hourly[GAS])
-    table[TEMP] = weighted_temperature(
-        {city: on_index(hourly[f"temperature_{city}"]) for city in CITIES},
-        {city: weight for city, (_lat, _lon, weight) in CITIES.items()},
-    )
+    table[TEMP], _first = splice_temperature(
+        city_temperature(hourly, "temperature_", on_index),
+        city_temperature(hourly, "temperature_era5_", on_index))
     days = pd.date_range(min(pd.Timestamp(DOWNLOAD_START), pd.Timestamp(index[0].date())),
                          pd.Timestamp(index[-1].date()), freq="D")
     oil = daily_oil_close(brent, days)
@@ -289,6 +317,23 @@ def print_gap_summary(table, before, filled, long_gaps):
     print("Hours still missing keep their row here; build_features.py drops them (F9).")
 
 
+def print_temperature_splice(hourly):
+    """C5: where the reanalysis hands over to the forecast, and how far apart they are."""
+    forecast = city_temperature(hourly, "temperature_")
+    reanalysis = city_temperature(hourly, "temperature_era5_")
+    _spliced, first = splice_temperature(forecast, reanalysis)
+    both = pd.concat([forecast, reanalysis], axis=1, keys=["forecast", "era5"]).dropna()
+    print(f"\nTemperature (C5): ERA5 reanalysis before {first.tz_convert(TIMEZONE)}, "
+          f"the 2-day-ahead forecast from then on")
+    if both.empty:
+        print("  the two never overlap, so their difference cannot be measured")
+        return
+    error = both["forecast"] - both["era5"]
+    print(f"  over the {len(both)} hours both exist ({both.index[0].date()} to "
+          f"{both.index[-1].date()}): forecast minus ERA5 has mean {error.mean():+.2f} C, "
+          f"mean absolute {error.abs().mean():.2f} C")
+
+
 def print_clock_changes(index):
     counts = rows_per_day(index)
     odd = counts[~counts.isin([23, 24, 25])]
@@ -324,6 +369,7 @@ def main():
     print_download_summary(report)
     check_incomplete_hours(report)
 
+    print_temperature_splice(hourly)
     table = assemble(hourly, read_raw(BRENT_FILE))
     table, before, filled, long_gaps = fill_gaps(table, MAX_GAP_HOURS)
     print_gap_summary(table, before, filled, long_gaps)

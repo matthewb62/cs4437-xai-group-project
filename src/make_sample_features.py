@@ -22,7 +22,7 @@ from config import (
     TARGET, TIMEZONE, TRAIN_END, TRAIN_START,
 )
 
-LEAD_IN_DAYS = 45   # extra days before TRAIN_START so every lag exists on 1 Jan 2024
+LEAD_IN_DAYS = 45   # extra days before TRAIN_START so every lag exists on TRAIN_START
 SAMPLE_TREES = 200
 
 

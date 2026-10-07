@@ -39,19 +39,34 @@ result we care about is which warning fires first, and by how many days.
 
 | Window | Dates | Use |
 | --- | --- | --- |
-| Training | Jan 2024 – Sep 2025 | Fitting both models |
+| Training | Jan 2019 – Sep 2025 | Fitting both models |
 | Validation | Oct 2025 | Early stopping, accuracy check, reference SHAP ranking |
 | Pre-crisis baseline | Nov 2025 – mid Feb 2026 | Normal wobble, and the 2 SD thresholds |
 | Test | 28 Feb 2026 onward | Fortnightly drift tracking |
 
-The feature table starts on 20 January 2024, not 1 January: Open-Meteo's forecast archive begins
-there, and a row is dropped if any feature is missing.
+Training was extended from Jan 2024 back to Jan 2019 on 7 Oct, the first full year of the DE-LU
+bidding zone (it was created on 1 Oct 2018). That gives about 6.75 years instead of 1.75, and it
+puts the COVID price collapse of 2020 and the 2021–22 gas crisis in front of both models.
+
+Open-Meteo's archive of 2-day-ahead temperature forecasts only begins on 20 January 2024. Before
+that the temperature column is ERA5 reanalysis, the observed temperature, with the same five-city
+weighting. `clean_data.py` takes the forecast wherever its archive has begun and ERA5 only for the
+hours before, and prints how far apart the two are over 2024, the year where both exist.
 
 ### Known limitations
 
-- LightGBM cannot extrapolate past its training range. The largest 30-day oil move in training was
-  21.4%, against 77.6% in the test period, so the oil model under-reacts and any drift it shows is
-  likely an underestimate.
+- LightGBM cannot extrapolate past its training range. With training from Jan 2024 the largest
+  30-day oil move it saw was 21.4%, against 77.6% in the test period. Starting in 2019 brings the
+  2020 collapse and rebound into training: Brent's 30-day change there runs from -71.5% to
+  +281%, so the test range now sits inside it. Moves that size are confined to a few weeks of
+  2020, though, so the oil model has seen few of them. `results/oil_range.json` has the exact
+  figures once the pipeline is rerun.
+- The blind model now trains on the 2021–22 gas crisis, so it is not seeing its first
+  fuel-price shock in 2026. That makes it a more realistic production model, but its explanations
+  may be more stable through the oil shock than a model that had never seen one.
+- Before 2024 the temperature is observed, not forecast, so the 2019–2023 training rows see a
+  slightly better temperature than anything the model gets at run time. Validation, baseline and
+  test rows only ever see the forecast.
 - The thresholds rest on 8 baseline windows, which is a small sample for a standard deviation.
   `src/check_seasonal.py` and the two-windows-in-a-row check in `results/summary.md` are the agreed
   tests of how much weight the warnings can carry.
@@ -62,7 +77,7 @@ there, and a row is dropped if any feature is missing.
 
 ```bash
 pip install -r requirements.txt          # Python 3.13
-python src/download_data.py              # into data/raw/, several minutes on a cold run
+python src/download_data.py              # into data/raw/, ~45 min on a cold run, cached after
 python src/clean_data.py                 # -> data/processed/clean_hourly.parquet
 python src/build_features.py             # -> data/processed/features.parquet
 python src/train.py                      # -> models/blind.txt, models/oil.txt
@@ -89,7 +104,8 @@ licence and filter used for every file.
 | Source | Series | Licence |
 | --- | --- | --- |
 | [SMARD.de](https://www.smard.de/), Bundesnetzagentur | Day-ahead price (DE-LU), day-ahead load, wind onshore, wind offshore and solar forecasts, actual fossil gas generation | CC BY 4.0 |
-| [Open-Meteo](https://open-meteo.com/) | Temperature forecast issued 2 days ahead, 5 German cities | CC BY 4.0 |
+| [Open-Meteo](https://open-meteo.com/) | Temperature forecast issued 2 days ahead, 5 German cities, from Jan 2024 | CC BY 4.0 |
+| [Open-Meteo](https://open-meteo.com/) Historical Weather (ERA5) | Observed temperature, same 5 cities, before Jan 2024 | CC BY 4.0; contains modified Copernicus Climate Change Service information |
 | [FRED DCOILBRENTEU](https://fred.stlouisfed.org/series/DCOILBRENTEU) | Brent crude, daily | Public domain, citation requested |
 
 The electricity series were moved from energy-charts to SMARD on 5 Oct 2026, after energy-charts
@@ -112,9 +128,11 @@ the four quarter-hours for the price and their sum for the generation series, wh
 
 ## Results so far
 
-`results/summary.md` is the current headline. On October 2025 both models beat the naive forecast
-(the same hour's price 7 days earlier) by about two thirds: 14.46 €/MWh for the blind model and
-14.87 for the oil model, against 43.48 naive.
+`results/summary.md` is the current headline. **It still comes from the Jan 2024 – Sep 2025
+training window** and has to be regenerated with the steps above now that training starts in 2019.
+On that run, October 2025 both models beat the naive forecast (the same hour's price 7 days
+earlier) by about two thirds: 14.46 €/MWh for the blind model and 14.87 for the oil model, against
+43.48 naive.
 
 ## Deliverables
 

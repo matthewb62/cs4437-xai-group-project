@@ -4,7 +4,7 @@ Reads data/processed/features.parquet and writes the handover files
 models/blind.txt and models/oil.txt, plus results/validation.json (M6, M7) and
 results/train_params.json (M8).
 
-Both models are fitted on January 2024 to September 2025 and early-stopped on
+Both models are fitted on January 2019 to September 2025 and early-stopped on
 October 2025. Nothing dated after 31 October 2025 is read at all: the table is
 cut at that date before anything is fitted, so the baseline and test periods
 cannot reach the fit or the tuning (M4, M5).

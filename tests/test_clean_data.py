@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
@@ -103,7 +104,7 @@ def test_c3_short_gaps_are_interpolated_and_long_gaps_are_left():
 
 
 def test_c3_hours_outside_a_series_coverage_are_not_gaps():
-    """Temperature starts in January 2024; the hours before it are not filled."""
+    """A series that starts late is not filled back to the start of the table."""
     index = pd.date_range("2024-05-01", periods=12, freq="h", tz=TIMEZONE)
     series = pd.Series([np.nan] * 5 + [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0], index=index)
     filled, short, long = clean_data.fill_short_gaps(series, MAX_GAP_HOURS)
@@ -146,6 +147,24 @@ def test_c5_an_hour_missing_one_city_is_missing():
     assert combined.iloc[0] == 10.0
 
 
+def test_c5_reanalysis_only_fills_the_hours_before_the_forecast_begins():
+    index = pd.date_range("2024-01-19 20:00", periods=8, freq="h", tz=TIMEZONE)
+    forecast = pd.Series([np.nan] * 3 + [5.0, 6.0, np.nan, 8.0, 9.0], index=index)
+    reanalysis = pd.Series(1.0, index=index)
+    spliced, first = clean_data.splice_temperature(forecast, reanalysis)
+    assert first == index[3]
+    assert (spliced.iloc[:3] == 1.0).all()                  # before the archive: ERA5
+    assert list(spliced.iloc[3:5]) == [5.0, 6.0]             # the forecast as it is
+    assert np.isnan(spliced.iloc[5])                         # a later gap is not filled
+    assert list(spliced.iloc[6:]) == [8.0, 9.0]
+
+
+def test_c5_an_empty_forecast_stops_cleaning():
+    index = pd.date_range("2024-01-19", periods=3, freq="h", tz=TIMEZONE)
+    with pytest.raises(clean_data.CleaningError, match="no values"):
+        clean_data.splice_temperature(pd.Series(np.nan, index=index), pd.Series(1.0, index=index))
+
+
 def test_c5_c6_assembly_puts_every_series_on_one_berlin_index():
     """C1-C6 together, on five hand-built days that contain the autumn clock change."""
     utc = pd.date_range("2024-10-24 22:00", "2024-10-29 23:00", freq="h", tz="UTC")
@@ -157,6 +176,7 @@ def test_c5_c6_assembly_puts_every_series_on_one_berlin_index():
         "forecast_wind_offshore": pd.Series(2000.0, index=utc),
         clean_data.GAS: pd.Series(4000.0, index=utc),
         **{f"temperature_{city}": pd.Series(12.0, index=utc) for city in CITIES},
+        **{f"temperature_era5_{city}": pd.Series(11.0, index=utc) for city in CITIES},
     }
     brent = pd.Series([80.0, 82.0],
                       index=pd.DatetimeIndex(["2024-10-25", "2024-10-28"], tz="UTC"))
@@ -185,6 +205,7 @@ def test_assembly_stops_at_the_last_complete_price_day():
         "forecast_wind_offshore": pd.Series(2000.0, index=utc),
         clean_data.GAS: pd.Series(4000.0, index=utc),
         **{f"temperature_{city}": pd.Series(12.0, index=utc) for city in CITIES},
+        **{f"temperature_era5_{city}": pd.Series(11.0, index=utc) for city in CITIES},
     }
     brent = pd.Series([80.0], index=pd.DatetimeIndex(["2024-06-01"], tz="UTC"))
     table = clean_data.assemble(hourly, brent)

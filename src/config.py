@@ -19,11 +19,20 @@ SAMPLE_FEATURES_FILE = PROCESSED_DIR / "features_SAMPLE.parquet"
 TIMEZONE = "Europe/Berlin"
 
 # Download range. One month before training, for the 7-day and 30-day lags.
-DOWNLOAD_START = "2023-12-01"
+# The DE-LU bidding zone, and so SMARD's DE-LU series, starts on 1 Oct 2018.
+DOWNLOAD_START = "2018-12-01"
 DOWNLOAD_END = date.today().isoformat()
 
+# Temperature. Open-Meteo's archive of 2-day-ahead forecasts begins in January
+# 2024, so before that the temperature column is ERA5 reanalysis, the observed
+# temperature. The forecast is asked for from TEMP_FORECAST_START; the
+# reanalysis runs to TEMP_REANALYSIS_END, which leaves a year where both exist
+# so clean_data.py can report how far apart they are.
+TEMP_FORECAST_START = "2024-01-01"
+TEMP_REANALYSIS_END = "2024-12-31"
+
 # Data windows. Inclusive dates in Berlin time.
-TRAIN_START = "2024-01-01"
+TRAIN_START = "2019-01-01"
 TRAIN_END = "2025-09-30"
 VAL_START = "2025-10-01"
 VAL_END = "2025-10-31"
