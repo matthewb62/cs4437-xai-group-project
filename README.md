@@ -27,8 +27,8 @@ electricity data alone?
 exact TreeSHAP values for every hourly prediction, rank the features by mean absolute SHAP, and
 compare that ranking against the **October 2025 reference ranking** using weighted Kendall's tau,
 which weights the top of the ranking most. Beside it we track MAE in €/MWh and PSI on the inputs
-against their training distribution. PSI is the control: it tells us whether SHAP says anything that
-simply watching the inputs would not.
+against the same fortnight a year earlier, so a change of season is not counted as drift. PSI is
+the control: it tells us whether SHAP says anything that simply watching the inputs would not.
 
 **Warning rule.** The Nov 2025 – mid Feb 2026 baseline windows set a mean and sample standard
 deviation for each metric. A window warns when tau falls more than 2 SD below its baseline mean, or
@@ -39,8 +39,9 @@ result we care about is which warning fires first, and by how many days.
 
 | Window | Dates | Use |
 | --- | --- | --- |
-| Training | Jan 2024 – Sep 2025 | Fitting both models |
-| Validation | Oct 2025 | Early stopping, accuracy check, reference SHAP ranking |
+| Training | Jan 2024 – Aug 2025 | Fitting both models |
+| Early stopping | Sep 2025 | Deciding when to stop adding trees |
+| Validation | Oct 2025 | Accuracy check, reference SHAP ranking |
 | Pre-crisis baseline | Nov 2025 – mid Feb 2026 | Normal wobble, and the 2 SD thresholds |
 | Test | 28 Feb 2026 onward | Fortnightly drift tracking |
 

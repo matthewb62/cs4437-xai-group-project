@@ -13,8 +13,8 @@
   "num_boost_round": 2000,
   "early_stopping_rounds": 50,
   "best_iteration": {
-    "blind": 82,
-    "oil": 73
+    "blind": 377,
+    "oil": 520
   },
   "features": {
     "blind": [

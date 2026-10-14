@@ -24,7 +24,9 @@ DOWNLOAD_END = date.today().isoformat()
 
 # Data windows. Inclusive dates in Berlin time.
 TRAIN_START = "2024-01-01"
-TRAIN_END = "2025-09-30"
+TRAIN_END = "2025-08-31"
+STOP_START = "2025-09-01"      # early stopping only, so October is never used to tune
+STOP_END = "2025-09-30"
 VAL_START = "2025-10-01"
 VAL_END = "2025-10-31"
 BASELINE_EARLIEST = "2025-11-01"

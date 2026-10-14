@@ -228,7 +228,6 @@ def analyse_model(name, table, windows, model_path, real):
     psi_features = [f for f in features if f not in TIME_FEATURES]
     train = day_slice(table, TRAIN_START, TRAIN_END)
     edges = {f: psi_edges(train[f].to_numpy()) for f in psi_features}
-    expected = {f: bin_shares(train[f].to_numpy(), edges[f]) for f in psi_features}
     print("  PSI bins per feature: " + ", ".join(f"{f} {len(edges[f]) - 1}" for f in psi_features))
 
     seasonal_shift = pd.Timedelta(days=SEASONAL_SHIFT_DAYS)
@@ -245,7 +244,11 @@ def analyse_model(name, table, windows, model_path, real):
             tau_seasonal = tau(importance, mean_abs_shap(explainer, year_ago[features]))
         else:
             tau_seasonal = np.nan
-        feature_psi = {f: psi(expected[f], bin_shares(X[f].to_numpy(), edges[f])) for f in psi_features}
+        # PSI against the same fortnight a year earlier, so a change of season is not counted as drift.
+        if year_ago.empty:
+            raise SystemExit(f"No rows a year before window {window.window_start.date()} for PSI")
+        feature_psi = {f: psi(bin_shares(year_ago[f].to_numpy(), edges[f]), bin_shares(X[f].to_numpy(), edges[f]))
+                       for f in psi_features}
         label = window.window_start.date().isoformat()
         importances[label] = importance
         psi_rows.append({"window_start": label, **feature_psi})

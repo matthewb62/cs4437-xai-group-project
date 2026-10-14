@@ -4,8 +4,9 @@ Reads data/processed/features.parquet and writes the handover files
 models/blind.txt and models/oil.txt, plus results/validation.json (M6, M7) and
 results/train_params.json (M8).
 
-Both models are fitted on January 2024 to September 2025 and early-stopped on
-October 2025. Nothing dated after 31 October 2025 is read at all: the table is
+Both models are fitted on January 2024 to August 2025, early-stopped on
+September 2025 and checked on October 2025, so the month that reports accuracy
+is never used to tune. Nothing dated after 31 October 2025 is read at all: the table is
 cut at that date before anything is fitted, so the baseline and test periods
 cannot reach the fit or the tuning (M4, M5).
 
@@ -27,7 +28,7 @@ import pandas as pd
 
 from config import (
     FEATURES_BLIND, FEATURES_FILE, FEATURES_OIL, MODELS_DIR, RESULTS_DIR, SEED,
-    TARGET, TIMEZONE, TRAIN_END, TRAIN_START, VAL_END, VAL_START,
+    STOP_END, STOP_START, TARGET, TIMEZONE, TRAIN_END, TRAIN_START, VAL_END, VAL_START,
 )
 
 VALIDATION_FILE = RESULTS_DIR / "validation.json"
@@ -81,6 +82,16 @@ def split(table):
     return train, valid
 
 
+def stopping_rows(table):
+    """The early-stopping month, between training and validation and sharing a row with neither."""
+    start = pd.Timestamp(STOP_START, tz=TIMEZONE)
+    stop = table[(table.index >= start)
+                 & (table.index < pd.Timestamp(STOP_END, tz=TIMEZONE) + pd.Timedelta(days=1))]
+    if stop.empty:
+        raise TrainingError(f"Empty early-stopping window ({STOP_START}..{STOP_END})")
+    return stop
+
+
 def cut_at_validation_end(table):
     """M4: nothing dated after the validation month reaches the fit or the tuning."""
     limit = pd.Timestamp(VAL_END, tz=TIMEZONE) + pd.Timedelta(days=1)
@@ -89,12 +100,12 @@ def cut_at_validation_end(table):
 
 # ---------------------------------------------------------------- M2, M3
 
-def fit(train, valid, features):
-    """One regression model over all 24 hours, early-stopped on the validation month."""
+def fit(train, stop, features):
+    """One regression model over all 24 hours, early-stopped on `stop`."""
     model = lgb.LGBMRegressor(n_estimators=NUM_BOOST_ROUND, **PARAMS)
     model.fit(
         train[features], train[TARGET],
-        eval_X=valid[features], eval_y=valid[TARGET],
+        eval_X=stop[features], eval_y=stop[TARGET],
         eval_metric="l1",
         callbacks=[lgb.early_stopping(EARLY_STOPPING_ROUNDS, verbose=False)],
     )
@@ -156,9 +167,10 @@ def main():
           f"before {VAL_END} (M4)")
 
     train, valid = split(table)
+    stop = stopping_rows(table)
     models, scores, train_scores, best_iterations = {}, {}, {}, {}
     for name, features in MODEL_FEATURES.items():
-        model = fit(train, valid, features)
+        model = fit(train, stop, features)
         models[name] = model
         scores[name] = validation_mae(model, valid, features)
         # The same measure on the rows it was fitted on, so the gap between the
@@ -177,6 +189,7 @@ def main():
 
     VALIDATION_FILE.write_text(json.dumps({
         "validation_window": f"{VAL_START}..{VAL_END}",
+        "early_stopping_window": f"{STOP_START}..{STOP_END}",
         "mae_blind_eur_per_mwh": round(scores["blind"], 3),
         "mae_oil_eur_per_mwh": round(scores["oil"], 3),
         "mae_naive_eur_per_mwh": round(naive, 3),
