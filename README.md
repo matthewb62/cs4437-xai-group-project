@@ -108,6 +108,7 @@ the four quarter-hours for the price and their sum for the generation series, wh
 | `figures/` | `drift_*.png`, the main plot per model, plus raw-unit and seasonal versions |
 | `journal/` | One dated entry per week, `YYYY-MM-DD.md` |
 | `report/` | Paper drafts (IEEE LaTeX, one file per section — see `report/README.md`). Commit every draft, not just the final one |
+| `presentation/` | Slides for the 12 Oct talk: `.pptx` source and a `.pdf` export that previews on GitHub |
 | `prompts/` | Log of the AI prompts used to write the code, required alongside it |
 | `data/` | Downloaded data. Never committed; recreate it with `src/download_data.py` |
 
@@ -119,7 +120,7 @@ the four quarter-hours for the price and their sum for the generation series, wh
 
 ## Deliverables
 
-- Presentation: 9 Oct 2026
+- Presentation: 9 Oct 2026 (slides: [`presentation/XAI_Presentation_Group8.pdf`](presentation/XAI_Presentation_Group8.pdf))
 - Paper (4 pages, fixed format) and journal: 23 Oct 2026
 - Latest report draft: [`report/main.tex`](report/main.tex)
 
