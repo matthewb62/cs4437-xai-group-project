@@ -1,0 +1,25 @@
+% OWNER: Tom | ~350 words + the paper's 2-3 figures
+% Job: report WHAT happened, with numbers. Interpretation goes in Discussion (Holly).
+%  - Did tau cross its warning line before error did? (No.)
+%  - Yesterday's price: top-2 in 2/8 pre-shock fortnights vs 14/15 after;
+%    mean |SHAP| 13.9 (Oct) -> 20.0 -> 35.5 (Sep) EUR/MWh.
+%  - PSI flagged some input every fortnight, even pre-shock.
+%  - Blind vs +Brent model: any difference?
+% Numbers come from results/*.csv and results/summary.md -- quote them, don't estimate.
+%
+% FIGURES (Tom):
+%  - Regenerate from results/*.csv in code, don't screenshot the existing PNGs.
+%  - Save as PDF to report/figures/, sized for ONE column (~3.5 in wide);
+%    fonts must be readable at that size (~8pt).
+%  - Max 3. Candidates: tau + error timeline with thresholds and shock line;
+%    mean |SHAP| of yesterday's price over time; PSI per fortnight.
+%  - Captions below figures, refer to them as Fig.~\ref{...} in the text.
+%
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics[width=\columnwidth]{tau_vs_error.pdf}
+%   \caption{Weighted Kendall's $\tau$ (top) and MAE (bottom) per fortnight.
+%   Dashed lines: 2-SD warning thresholds. Vertical line: shock onset.}
+%   \label{fig:tau_error}
+% \end{figure}
+TODO: drift signals.

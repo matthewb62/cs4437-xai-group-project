@@ -1,0 +1,11 @@
+% OWNER: Conor | ~250 words
+% Job: enough detail that someone could rebuild the model.
+%  - Sources: energy-charts day-ahead prices, FRED Brent oil.
+%  - Training window to ~Oct 2025; later pre-shock data held out as baseline.
+%  - Features + leakage fixes (gas generation lagged 1 day, temperature as a
+%    forecast, hour as a feature, oil as 30-day % change).
+%  - Two models: "blind" main model (no fuel prices) vs comparison model (+Brent only).
+%  - LightGBM [ke2017]; baseline error vs naive last-week forecast
+%    (model MAE 14.5 vs naive 43.5 EUR/MWh -- check against results/validation.json).
+% Cite with \cite{key} from refs.bib.
+TODO: data and model.

@@ -5,15 +5,14 @@
 
 ## Who writes what
 
-| File | Owner | Words |
+Each person owns one short section and half of Method or Results.
+
+| Person | Short section | Half of Method / Results |
 |---|---|---|
-| `sections/abstract.tex` | Holly (write last) | ~170 |
-| `sections/intro.tex` | Holly | ~300 |
-| `sections/related.tex` | Tom | ~350 |
-| `sections/method.tex` — Data and Model | Conor | ~250 |
-| `sections/method.tex` — Drift Measurement | Matthew | ~300 |
-| `sections/results.tex` | Matthew + Conor/Holly (discussion) | ~650 |
-| `sections/conclusion.tex` | Conor + Holly | ~300 |
+| Holly | `intro.tex` (~300 words) | `results_discussion.tex` (~300) |
+| Tom | `related.tex` (~350) | `results_findings.tex` (~350) + the 2–3 figures |
+| Conor | `conclusion.tex` (~300) | `method_data.tex` (~250) |
+| Matthew | `abstract.tex` (~170, written last) | `method_drift.tex` (~300) |
 
 ## Rules
 - Only edit your own file or subsection.
