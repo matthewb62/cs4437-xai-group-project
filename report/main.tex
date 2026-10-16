@@ -1,0 +1,79 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage[caption=false,font=footnotesize]{subfig} % IEEEtran-safe subfigures
+\usepackage{url}
+
+\graphicspath{{figures/}}
+
+% =====================================================================
+% LIMIT: 4 pages INCLUDING references (references on their own page).
+%   -> Sections I-VI must fit on pages 1-3; references = page 4.
+%   -> Budget: ~2,200 words of text + 2-3 figures.
+% Do NOT change margins, font size or spacing (format = 10% of grade).
+% Each person writes ONLY in their own file in sections/.
+% =====================================================================
+
+\begin{document}
+
+% Working title -- agree final wording as a group
+\title{Do Explanations Drift Before Accuracy? Monitoring a SHAP-Explained
+Day-Ahead Electricity Price Model Through the 2026 Oil Shock}
+
+\author{
+\IEEEauthorblockN{Holly Best}
+\IEEEauthorblockA{\textit{University of Limerick}\\
+Limerick, Ireland \\
+TODO@studentmail.ul.ie}
+\and
+\IEEEauthorblockN{Matthew Burke}
+\IEEEauthorblockA{\textit{University of Limerick}\\
+Limerick, Ireland \\
+24416827@studentmail.ul.ie}
+\and
+\IEEEauthorblockN{Tom Byrne}
+\IEEEauthorblockA{\textit{University of Limerick}\\
+Limerick, Ireland \\
+TODO@studentmail.ul.ie}
+\and
+\IEEEauthorblockN{Conor Clancy}
+\IEEEauthorblockA{\textit{University of Limerick}\\
+Limerick, Ireland \\
+TODO@studentmail.ul.ie}
+}
+
+\maketitle
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\begin{IEEEkeywords}
+explainable AI, SHAP, model monitoring, concept drift, electricity price forecasting
+\end{IEEEkeywords}
+
+\section{Introduction}
+\input{sections/intro}
+
+\section{Background and Related Work}
+\input{sections/related}
+
+\section{Methodology}
+\input{sections/method}
+
+\section{Results and Discussion}
+\input{sections/results}
+
+\section{Conclusion and Limitations}
+\input{sections/conclusion}
+
+% References must start on their own page
+\clearpage
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

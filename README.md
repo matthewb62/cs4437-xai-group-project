@@ -107,7 +107,7 @@ the four quarter-hours for the price and their sum for the generation series, wh
 | `results/` | `summary.md` (the headline result), `drift_*.csv` per window, `validation.json`, `oil_range.json`, thresholds, `seasonal_check.md` |
 | `figures/` | `drift_*.png`, the main plot per model, plus raw-unit and seasonal versions |
 | `journal/` | One dated entry per week, `YYYY-MM-DD.md` |
-| `report/` | Paper drafts — commit every draft, not just the final one (to be added) |
+| `report/` | Paper drafts (IEEE LaTeX, one file per section — see `report/README.md`). Commit every draft, not just the final one |
 | `prompts/` | Log of the AI prompts used to write the code, required alongside it |
 | `data/` | Downloaded data. Never committed; recreate it with `src/download_data.py` |
 
@@ -121,7 +121,7 @@ the four quarter-hours for the price and their sum for the generation series, wh
 
 - Presentation: 9 Oct 2026
 - Paper (4 pages, fixed format) and journal: 23 Oct 2026
-- Latest report draft: TBD
+- Latest report draft: [`report/main.tex`](report/main.tex)
 
 ---
 *README drafted with AI assistance.*
