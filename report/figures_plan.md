@@ -22,7 +22,7 @@ The order below is the order of priority. If we only have room for two, drop Fig
 
 **What the reader should see:**
 - Blind: tau crosses once on 25 Apr and drops back. MAE crosses on 20 Jun and stays over. PSI crosses on 15 Aug.
-- Oil: tau crosses on 25 Apr and 9 May, MAE on 23 May, PSI on 12 Sep.
+- Oil: tau is over for three fortnights in a row (25 Apr, 9 May, 23 May), MAE crosses on 23 May, PSI on 12 Sep.
 
 `src/plot.py` (`plot_z`) already makes most of this, so it's mostly a matter of resizing and saving as PDF.
 
