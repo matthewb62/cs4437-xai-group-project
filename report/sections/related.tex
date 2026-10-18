@@ -26,8 +26,9 @@ the inputs need not hurt the model, however, so such monitors can raise
 false alarms \cite{mougan2025}. Explanations depend on both the data and
 the model. Dem\v{s}ar and Bosni\'{c} \cite{demsar2018} detected drift in
 synthetic data streams by watching a classifier's explanations change.
-Lundberg et al. \cite{lundberg2020} tracked a deployed model's loss per
-feature over time, but loss needs labels. Mougan et al. \cite{mougan2025}
+Lundberg et al. \cite{lundberg2020} split a hospital model's loss among its
+features over a simulated deployment, which revealed errors that overall
+loss hid, but loss needs the true outcome. Mougan et al. \cite{mougan2025}
 define \emph{explanation shift} as a change in how predictions are
 explained on new data compared with training data, and detect it with a
 classifier on SHAP values, which they find more sensitive than checks on
