@@ -1,25 +1,33 @@
-% OWNER: Tom | ~350 words + the paper's 2-3 figures
+% OWNER: Tom | ~350 words + the paper's figures
 % Job: report WHAT happened, with numbers. Interpretation goes in Discussion (Holly).
-%  - Did tau cross its warning line before error did? (No.)
-%  - Yesterday's price: top-2 in 2/8 pre-shock fortnights vs 14/15 after;
-%    mean |SHAP| 13.9 (Oct) -> 20.0 -> 35.5 (Sep) EUR/MWh.
-%  - PSI flagged some input every fortnight, even pre-shock.
+%  - Did tau cross its warning line before error did? Single window: yes,
+%    25 Apr vs MAE 20 Jun (blind). Two in a row: tau never, MAE 4 Jul (blind).
+%    Against the same fortnight a year earlier: tau never crosses (both models).
+%  - Yesterday's price: top-2 in 0/8 pre-shock fortnights vs 9/16 after (blind);
+%    mean |SHAP| 11.3 (Oct) -> 35.3 (26 Sep) EUR/MWh.
+%  - PSI: first crossing 15 Aug (blind), 12 Sep (oil), after the error.
 %  - Blind vs +Brent model: any difference?
 % Numbers come from results/*.csv and results/summary.md -- quote them, don't estimate.
-%
-% FIGURES (Tom):
-%  - Regenerate from results/*.csv in code, don't screenshot the existing PNGs.
-%  - Save as PDF to report/figures/, sized for ONE column (~3.5 in wide);
-%    fonts must be readable at that size (~8pt).
-%  - Max 3. Candidates: tau + error timeline with thresholds and shock line;
-%    mean |SHAP| of yesterday's price over time; PSI per fortnight.
-%  - Captions below figures, refer to them as Fig.~\ref{...} in the text.
-%
-% \begin{figure}[t]
-%   \centering
-%   \includegraphics[width=\columnwidth]{tau_vs_error.pdf}
-%   \caption{Weighted Kendall's $\tau$ (top) and MAE (bottom) per fortnight.
-%   Dashed lines: 2-SD warning thresholds. Vertical line: shock onset.}
-%   \label{fig:tau_error}
-% \end{figure}
+% Refer to the figures as Fig.~\ref{fig:seasonal} and Fig.~\ref{fig:shap}.
+% Figures are made by src/plot_paper.py from results/*.csv -- rerun it, don't edit the PDFs.
+
 TODO: drift signals.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{tau_seasonal.pdf}
+  \caption{Blind model: explanation drift against the October 2025 reference
+  and against the same fortnight one year earlier, with error (MAE), in
+  standard deviations from the baseline mean. Dashed line: 2~SD warning
+  threshold. Filled markers: window over the threshold.}
+  \label{fig:seasonal}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{shap_top4.pdf}
+  \caption{Blind model: mean absolute SHAP value of the four most important
+  features per fortnight. The first point is the October 2025 reference
+  month.}
+  \label{fig:shap}
+\end{figure}

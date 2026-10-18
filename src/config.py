@@ -11,6 +11,7 @@ PROCESSED_DIR = ROOT / "data" / "processed"
 MODELS_DIR = ROOT / "models"
 RESULTS_DIR = ROOT / "results"
 FIGURES_DIR = ROOT / "figures"
+PAPER_FIGURES_DIR = ROOT / "report" / "figures"
 
 CLEAN_FILE = PROCESSED_DIR / "clean_hourly.parquet"
 FEATURES_FILE = PROCESSED_DIR / "features.parquet"

@@ -1,5 +1,7 @@
 # Figures plan (draft)
 
+**Decided (18 Oct):** the paper uses two figures, both blind model: Fig. 2 below (tau against the same season, with error) as `tau_seasonal.pdf`, and Fig. 3 below (size of the SHAP values over time) as `shap_top4.pdf`. Both are made by `src/plot_paper.py` and placed in `sections/results_findings.tex`. The rest of this file is the original plan.
+
 We have room for 2-3 figures. Each one is a single column (`width=\columnwidth`, about 3.5 in wide), saved as PDF to `report/figures/`, with fonts readable at that size (about 8 pt). Captions go below. All three are made from `results/*.csv` in code, not screenshots of the PNGs in `figures/`, which are sized for slides.
 
 The order below is the order of priority. If we only have room for two, drop Fig. 3 and use Table I instead.
