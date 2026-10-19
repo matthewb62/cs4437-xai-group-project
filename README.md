@@ -70,6 +70,7 @@ python src/train.py                      # -> models/blind.txt, models/oil.txt
 python src/analyse.py --real             # -> results/drift_*.csv, results/summary.md
 python src/plot.py --real                # -> figures/drift_*.png
 python src/check_seasonal.py             # additional seasonality check
+python src/plot_paper.py                 # -> report/figures/*.pdf, the paper's figures
 pytest                                   # the automated acceptance checks
 ```
 

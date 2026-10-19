@@ -1,13 +1,43 @@
-% OWNER: Tom | ~350 words (~0.45 page)
-% Job: show where the idea comes from and what gap we fill (lecturer asked for this).
-% Suggested paragraphs (1-2 sentences per paper -- space is tight):
-%  1. SHAP and TreeSHAP [lundberg2017], [lundberg2020]; LightGBM [ke2017].
-%     Link to course: SHAP vs permutation importance / LIME covered in lectures.
-%  2. XAI on electricity prices: [trebbien2023] (LightGBM + SHAP, German
-%     day-ahead, uses fuel prices + actual generation); forecasting practice [lago2021].
-%  3. Drift detection: concept drift survey [gama2014]; PSI [yurdakul2018];
-%     explanation-based monitoring [lundberg2020], [mougan2025].
-%  4. Gap: we differ from [trebbien2023] by (a) leaving fuel out of the main
-%     model on purpose and (b) tracking explanations over time through a real shock.
-% Include at least one ASSIGNED COURSE READING here (brief requires a mix).
-TODO: related work.
+% !TEX root = ../main.tex
+% OWNER: Tom | ~350 words
+% TODO (Tom): add at least one ASSIGNED COURSE READING (brief requires a mix).
+
+SHAP splits a single prediction into one contribution per feature, using
+Shapley values from game theory \cite{lundberg2017}. Averaging the absolute
+contributions over many predictions ranks the features globally. For tree
+ensembles such as LightGBM \cite{ke2017}, TreeSHAP computes these values
+exactly and fast enough to explain every hour of a long test period
+\cite{lundberg2020}. We chose SHAP over permutation importance
+\cite{breiman2001}, also covered in the module, because permutation
+importance needs the true price, which a deployed model does not yet have.
+
+Our setup follows Trebbien et al. \cite{trebbien2023}, who used
+gradient-boosted trees and SHAP to explain German day-ahead prices. They
+found load, wind and solar to be the main drivers, with fuel prices also
+mattering. Their model analyses prices after the fact, so it uses observed
+values and fuel prices, and is explained once over a fixed period. We also
+follow Lago et al. \cite{lago2021} in comparing against a naive benchmark.
+
+Concept drift is a change over time in the joint distribution of inputs
+and target, which can affect the inputs, the link between inputs and
+target, or both \cite{gama2014}. Many monitors watch only the inputs, and
+PSI is a common example from credit scoring \cite{yurdakul2018}. A shift in
+the inputs need not hurt the model, however, so such monitors can raise
+false alarms \cite{mougan2025}. Explanations depend on both the data and
+the model. Dem\v{s}ar and Bosni\'{c} \cite{demsar2018} detected drift in
+synthetic data streams by watching a classifier's explanations change.
+Lundberg et al. \cite{lundberg2020} split a hospital model's loss among its
+features over a simulated deployment, which revealed errors that overall
+loss hid, but loss needs the true outcome. Mougan et al. \cite{mougan2025}
+define \emph{explanation shift} as a change in how predictions are
+explained on new data compared with training data, and detect it with a
+classifier on SHAP values, which they find more sensitive than checks on
+the inputs alone.
+
+We combine these strands. Unlike Trebbien et al., our main model never
+sees a fuel price, so the oil shock can only reach its explanations through
+the electricity data. We also follow the explanations through a real, dated
+shock -- the closure of the Strait of Hormuz -- rather than one fixed
+period. Unlike Mougan et al., we use a rank measure that can be read
+directly, and hold it to the same warning rule as error and PSI, so the
+three signals can be compared by date.
