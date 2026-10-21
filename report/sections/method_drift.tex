@@ -2,51 +2,33 @@
 % OWNER: Matthew | ~300 words
 
 We split the period from 1 November 2025 to 9 October 2026 into
-consecutive 14-day windows (fortnights) of 336 hours each. Test windows
+consecutive 14-day windows (fortnights). Test windows
 start on 28 February 2026, the first day of the shock, and eight baseline
-windows run back from it. The model is frozen throughout, so any change
-in its explanations comes from the data and not from retraining.
+windows run back from it. The model is never retrained, so any change comes from the data.
 
 \textbf{Explanation drift.} For each window we compute TreeSHAP values
 \cite{lundberg2020} for every hour and score each feature by its mean
-absolute SHAP value over the window, which ranks the features by how
-strongly they moved the forecast. The reference ranking comes from the
+absolute SHAP value over the window. The reference ranking comes from the
 October 2025 validation month. We compare each window's ranking to the
-reference with weighted Kendall's tau \cite{kendall1938,vigna2015}
-\begin{equation}
-\tau_w = \frac{\sum_{i<j} w_{ij}\,\mathrm{sgn}(x_i - x_j)\,\mathrm{sgn}(y_i - y_j)}
-              {\sqrt{\sum_{i<j} w_{ij}\,\mathrm{sgn}(x_i - x_j)^2}\,
-               \sqrt{\sum_{i<j} w_{ij}\,\mathrm{sgn}(y_i - y_j)^2}},
-\end{equation}
-where $x_i$ and $y_i$ are feature $i$'s scores in the two windows. Each
-pair is weighted by $w_{ij} = \frac{1}{r_i+1} + \frac{1}{r_j+1}$, where
-$r$ is a feature's rank (0 for the top), so pairs near the top of the
-ranking count most \cite{vigna2015}. We weight because a few features
-carry most of the SHAP mass. In October the top four of twelve account
-for 79\% of it, so a swap between the top two matters far more than one
-between the bottom two. The resulting $\tau_w$ measures how far a
-window's ranking has moved from the October reference. A value of 1
-means the same order, 0 means no relation and $-1$ means a fully
-reversed order. As a seasonal check, we also compare each window with
-the same 14 days one year earlier, shifted 364 days so weekdays align.
-
-\textbf{Input drift.} As a check that ignores the model, we compute the
-Population Stability Index (PSI) \cite{yurdakul2018} for each input
-except hour, weekday, month and the holiday flag, whose values are set
-by the calendar and cannot drift. PSI measures how much the spread of
-an input's values has shifted compared with the same 14 days one year
-earlier, where 0 means no shift. We average the eight inputs' PSI values
-to give one PSI per window, and also flag any single input at or above
+reference with weighted Kendall's tau $\tau_w$ \cite{kendall1938,vigna2015}
+(1: same order; 0: unrelated; $-1$: reversed), which weights each
+feature pair by $w_{ij} = \frac{1}{r_i+1} + \frac{1}{r_j+1}$, where $r$
+is a feature's rank (0 for the top), so pairs near the top of the
+ranking count most. Weighting matters because the top four of twelve
+features carry 79\% of October's SHAP mass. We also compare each window with the same fortnight a year earlier.
+\textbf{Input drift.} We compute the Population Stability Index (PSI)
+\cite{yurdakul2018} for each non-calendar input, measuring how much the
+spread of its values has shifted compared with the same 14 days one year
+earlier (0 means no shift). We average the eight inputs' PSI values to
+give one PSI per window, and also flag any single input at or above
 0.25, a commonly used cut off \cite{yurdakul2018}.
 
 \textbf{Warning rule.} We treat the eight baseline windows as normal
-behaviour. For each of $\tau_w$, MAE and PSI we take its mean over these
-windows, which gives its usual level, and its standard deviation (SD),
-which gives how much it usually varies. A test window raises a warning
-when it lies more than 2~SD from the mean in the worse direction, which
-is lower for $\tau_w$ and higher for MAE and PSI. For the blind model
-this puts the $\tau_w$ warning line at 0.71. Because MAE gets its own
-2~SD warning line in the same way, we can measure lead time as the
-number of days between the first $\tau_w$ warning and the first MAE
-warning. We also report a stricter variant that needs two consecutive
-windows over the line.
+behaviour. For each of $\tau_w$, MAE and PSI we take its mean and
+standard deviation (SD) over these windows. A test window raises a
+warning when it lies more than 2~SD from the mean in the worse
+direction, which is lower for $\tau_w$ and higher for MAE and PSI. For
+the blind model this puts the $\tau_w$ warning line at 0.71. Lead time
+is the number of days between the first $\tau_w$ warning and the first
+MAE warning. We also report a stricter variant that needs two
+consecutive windows over the line.

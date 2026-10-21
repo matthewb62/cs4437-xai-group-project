@@ -34,10 +34,8 @@ explained on new data compared with training data, and detect it with a
 classifier on SHAP values, which they find more sensitive than checks on
 the inputs alone.
 
-We combine these strands. Unlike Trebbien et al., our main model never
-sees a fuel price, so the oil shock can only reach its explanations through
-the electricity data. We also follow the explanations through a real, dated
-shock -- the closure of the Strait of Hormuz -- rather than one fixed
-period. Unlike Mougan et al., we use a rank measure that can be read
-directly, and hold it to the same warning rule as error and PSI, so the
-three signals can be compared by date.
+Unlike Trebbien et al., our main model never sees a fuel price, and we
+follow its explanations through a real, dated shock rather than one fixed
+period. Unlike Mougan et al., we use a directly readable rank measure, held
+to the same warning rule as error and PSI so the three signals can be
+compared by date.

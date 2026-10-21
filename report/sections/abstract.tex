@@ -1,4 +1,18 @@
 % OWNER: Matthew | ~150-200 words | WRITE LAST, once results are final
 % Rubric: "the abstract accurately previews the paper". Cover in order:
 %   question -> data/model -> how drift is measured -> main finding -> key limitation.
-TODO: abstract.
+Forecasting models are usually monitored through their error, known only
+once the true outcome arrives. SHAP explanations exist as soon as a
+prediction is made, so changes in them could warn earlier. We test this
+through a real shock with a known date, the closure of the Strait of Hormuz
+on 28 February 2026. Two frozen LightGBM models forecast German day-ahead
+electricity prices, one without fuel prices and one given the 30-day change
+in Brent. Each fortnight we rank features by mean absolute TreeSHAP value,
+compare the ranking with a pre-shock reference using weighted Kendall's tau,
+and apply a two-standard-deviation warning rule to tau, error and the
+Population Stability Index. Tau warned up to 56 days before error, but a
+seasonally matched comparison traces this to the change of season rather
+than the shock. The explanations changed more in size than in order, as
+attribution to yesterday's price tripled, which a rank measure barely
+registers. In this single event, explanations are better monitored
+alongside error than in place of it.
