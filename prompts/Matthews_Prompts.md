@@ -6,6 +6,8 @@ AI prompts used by Matthew Burke (Claude chat) for the CS4437 XAI group project,
 
 *Compiled on 15 Oct 2026 from chat history; each prompt is dated by when it was originally sent.*
 
+*This file was formatted with AI help (Claude).*
+
 ---
 
 ## 2026-09-16 to 18 — Topic selection
@@ -114,7 +116,7 @@ AI prompts used by Matthew Burke (Claude chat) for the CS4437 XAI group project,
 
 ---
 
-## 2026-10-04 to 06 — Building the pipeline with Claude Code
+## 2026-10-05 to 06 — Building the pipeline with Claude Code
 *Chat: "Delegating work to CC"*
 
 > This is an activity for class. Does it align with what I'm doing rn with project work at all,
@@ -124,7 +126,7 @@ AI prompts used by Matthew Burke (Claude chat) for the CS4437 XAI group project,
 
 ---
 
-## 2026-10-04 to 05 — Claude Code prompts (pipeline, SMARD switch, seasonal check, README)
+## 2026-10-05 — Claude Code prompts (pipeline, SMARD switch, seasonal check, README)
 *Tool: Claude Code, run in the group repo*
 
 **Cleaning, features and training scripts**
@@ -203,6 +205,23 @@ It should cover, briefly:
 - Repo layout (src, tests, results, figures, journal, report, prompts); note data/
 ```
 
+---
+
+## 2026-10-07 — Sources document
+*Chat: "Source summaries for presentation"*
+
+> okay, i want to make a mark down file which foes throug all the sources listed in all of the journals , specifically the good / proper ones so that we can refer to them in our presentation / final report. I want 1-2 short sentecnes on each good source so we csn understand it, defend it and explain what its about. see my prompt to holly here:
+> [pasted: my earlier message to Holly asking for Related Work summaries of Trebbien et al. 2023, Lundberg et al. 2020, Mougan et al. 2025 and Demšar & Bosnić 2018, with a What they did / How it relates / Where it goes format]
+
+## 2026-10-07 — Slides and live demo
+> does this mean we can submit any file type..? cus lowkey html might work best..?
+> [pasted: Assignment 02 brief and rubric from Brightspace]
+
+> i think we should note that we must assume the people we are presenting too have swe knowledge but not ML, like that conecpt there is kind of hard for me to wrap my head around, maybe something interactive could be used to explain it well? like a very simple graph with error rate and weighted tau and then we can click values on / off type of vibe? idk think of a way we could make that work, or even like a toggleable on off for different features and we can see how ranking is affected..
+
+## 2026-10-09 — Blind-model input range check (Claude Code)
+*Chat: "Source summaries for presentation"; prompt run in Claude Code in the group repo*
+
 **Blind-model input range check**
 ```text
 Add a check for whether the blind model's inputs went outside their training range after the oil shock, the same idea as the existing oil-range check (results/oil_range.json, F10 in the README).
@@ -222,16 +241,23 @@ Write the results to results/input_range.json and a short results/input_range.md
 Don't change any existing results or scripts. Run it, then tell me: did any blind-model input go meaningfully beyond its training range, and if so, when?
 ```
 
----
+## 2026-10-16 — Paper skeleton and section split
+*Chat: "XAI conference paper project"*
 
-## 2026-10-07 — Sources document
-*Chat: "Source summaries for presentation"*
+> ive a meeting in an hour to discuss the report / splitting up the work for it, the general plan is to have a drafy or a v1 stleast by sunday so then any questions we can ask to james on monday
 
-> okay, i want to make a mark down file which foes throug all the sources listed in all of the journals , specifically the good / proper ones so that we can refer to them in our presentation / final report. I want 1-2 short sentecnes on each good source so we csn understand it, defend it and explain what its about. see my prompt to holly here:
-> [pasted: my earlier message to Holly asking for Related Work summaries of Trebbien et al. 2023, Lundberg et al. 2020, Mougan et al. 2025 and Demšar & Bosnić 2018, with a What they did / How it relates / Where it goes format]
+> [pasted: Assignment 03 brief and rubric from Brightspace]
+> i have this open now, but of course its just a template [Overleaf IEEE template]
+> maybe should we clean it up a bit but keep the formatting, and then i can share it with my team and we can all write our individual sections..?
 
-## 2026-10-07 to 09 — Slides and live demo
-> does this mean we can submit any file type..? cus lowkey html might work best..?
-> [pasted: Assignment 02 brief and rubric from Brightspace]
+> we want to make a shared somethign so we can split up diofferent sections
 
-> i think we should note that we must assume the people we are presenting too have swe knowledge but not ML, like that conecpt there is kind of hard for me to wrap my head around, maybe something interactive could be used to explain it well? like a very simple graph with error rate and weighted tau and then we can click values on / off type of vibe? idk think of a way we could make that work, or even like a toggleable on off for different features and we can see how ranking is affected..
+> we want to split it like this:
+> one person each gets intro abstract conclusion and related as these sectiosn kidn of suck - and then we split results and method in 2 ways each - tom wants to work something on the figures if he can
+
+## 2026-10-19 — Yesterday's price vs spring/summer 2025 (src/check_yday_2025.py)
+Follow-up from the 15 Oct journal.
+
+> can you check if yesterday's price going up the ranking after the shock is just the season? compare each fortnight after the shock with the same fortnight last year, using the same models and setup as the rest of our checks
+
+> tidy that into a script like the other checks and save the results so we can push it
