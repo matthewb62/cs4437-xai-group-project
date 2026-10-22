@@ -2,27 +2,48 @@ We use hourly day-ahead prices for the German--Luxembourg (DE-LU) bidding
 zone from SMARD\footnote{\url{https://www.smard.de}}, with its day-ahead
 load, wind and solar forecasts \cite{trebbien2023} and actual gas-fired
 generation, plus Open-Meteo temperature forecasts and daily Brent prices
-from FRED. All series use Berlin time. Gaps of up to three hours in the
-hourly inputs are interpolated; the price is never filled.
+from FRED. All series use Berlin time. Short gaps of up to three hours in
+the inputs are filled by linear interpolation. Hours still missing a price
+or any input are dropped.
 
 The data are split by date, so the model is never evaluated on hours it
 has seen. Both models are trained on 20 January 2024 to 31 August 2025
 (14,140 hours), early-stopped on September 2025 and validated on October
 2025.
 
-Every feature for hour $h$ on day $D$ must have been known before the
-auction closed at 12:00 on $D-1$. Prices are lagged to the same hour on
-$D-1$, $D-2$ and $D-7$. Gas generation is taken from $D-1$ for hours
-before noon and from $D-2$ after. Temperature is a two-day-ahead forecast
-and Brent the last close on or before $D-2$. The pipeline checks every
-lagged timestamp against this cut-off. Hour, weekday, month and a
-public-holiday flag complete the inputs.
+The day-ahead auction closes at 12:00 each day and sets one price for each
+hour of the next day, so every input must already be available when that
+auction closes on the day before delivery. Table~\ref{tab:features} lists
+the inputs under this rule. The pipeline checks every lagged timestamp against this cut-off.
 
-Two models differ in one column: the \emph{blind} model never sees a fuel
+Two models differ in one column. The \emph{blind} model never sees a fuel
 price, while the \emph{oil} model adds the 30-day change in Brent. Both
 share rows, hyperparameters and seed. Each is a single LightGBM regressor
 \cite{ke2017} covering all 24 hours, with learning rate 0.05 and 31 leaves.
 
-On October 2025, the blind and oil models reach an MAE of 15.4 and
-16.3~EUR/MWh, against 43.5 for a seasonal naive forecast using the price
-one week earlier \cite{lago2021}.
+On the October 2025 validation month, the blind and oil models reach a mean absolute error (MAE)
+of 15.4 and 16.3~EUR/MWh, against 43.5 for a seasonal naive forecast using
+the same hour's price one week earlier \cite{lago2021}.
+
+\begin{table}[b]
+  \centering
+  \caption{The twelve model inputs, with their source and the timing that
+  keeps each one available before the auction closes on $D-1$. Delivery is
+  hour $h$ of day $D$.}
+  \label{tab:features}
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{@{}lll@{}}
+    \hline
+    Feature & Source & Lag / timing \\
+    \hline
+    Price, hour $h$ & SMARD & $D-1$, $D-2$, $D-7$ \\
+    Demand, wind, solar forecasts & SMARD & day-ahead, hour $h$ \\
+    Gas generation & SMARD & $D-1$ if $h<12$, else $D-2$ \\
+    Temperature & Open-Meteo & forecast issued $D-2$ \\
+    Hour, weekday, month, holiday & calendar & day $D$ \\
+    Brent, 30-day change & FRED & close on or before $D-2$ \\
+    \quad(oil model only) & & \\
+    \hline
+  \end{tabular}
+\end{table}

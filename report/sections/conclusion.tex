@@ -1,27 +1,15 @@
 We asked whether a model's explanations drift before its accuracy does.
-Under our single-window rule they did: for both models, weighted Kendall's
-$\tau$ first crossed its warning threshold on 25 April 2026, 56 days before
-MAE for the blind model and 28 days before it for the oil model. The signal
+Under our single-window rule they did, by up to 56 days. The signal
 is fragile, however. When two windows in a row are required, the blind
-model's $\tau$ never warns while its error does, and $\tau$ measured against
-the same fortnight a year earlier never crosses for either model, suggesting
-much of the early movement was seasonal. Rank-based explanation drift is
-therefore not yet a reliable early warning here. The explanations changed
-more in scale than in order: the mean absolute SHAP value of yesterday's
-price rose from 11.3 to 35.3~EUR/MWh by September, while the same four
-features stayed on top, growth that a rank-based measure cannot register.
+model's $\tau_w$ never warns while its error does, and $\tau_w$ measured
+against the same fortnight a year earlier never crosses for either model,
+suggesting much of the early movement was seasonal. Rank-based explanation drift is therefore not yet a reliable early warning
+here. The explanations changed more in scale than in order: attribution to
+yesterday's price tripled while the same four features stayed on top.
 
 Our study has clear limits. It covers one event, one market and one model type (gradient-boosted
 trees), so the results may not generalise. The models are frozen, so we
-cannot say how monitoring interacts with retraining. Links between drift
-and world events are plausible but untested. The thresholds rest on only
-eight baseline windows, a small sample for a standard deviation. The oil
-model met 30-day Brent moves of up to 77.6\%, far beyond the 21.4\% seen in
-training, and tree models cannot extrapolate, so its response is likely
-understated. We used only TreeSHAP with a mean-$|$SHAP$|$ ranking; other
-explainers may behave differently. Finally, SHAP explains the model, not
-the market: it shows which inputs drove a prediction, not why prices moved.
-
-Future work should test drift measures that track magnitude as well as
-rank, use seasonally matched reference rankings by default, and study
-monitoring alongside scheduled retraining.
+cannot say how monitoring interacts with retraining. The thresholds rest on only eight baseline windows. We used only TreeSHAP
+with a mean-$|$SHAP$|$ ranking; other explainers may differ.
+Future work should test magnitude-aware drift measures, use seasonally
+matched references by default, and study monitoring alongside retraining.

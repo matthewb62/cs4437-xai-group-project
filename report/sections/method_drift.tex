@@ -1,7 +1,7 @@
 % !TEX root = ../main.tex
 % OWNER: Matthew | ~300 words
 
-We split the period from 1 November 2025 to 9 October 2026 into
+We split the period from 8 November 2025 to 9 October 2026 into
 consecutive 14-day windows (fortnights). Test windows
 start on 28 February 2026, the first day of the shock, and eight baseline
 windows run back from it. The model is never retrained, so any change comes from the data.
@@ -16,12 +16,13 @@ feature pair by $w_{ij} = \frac{1}{r_i+1} + \frac{1}{r_j+1}$, where $r$
 is a feature's rank (0 for the top), so pairs near the top of the
 ranking count most. Weighting matters because the top four of twelve
 features carry 79\% of October's SHAP mass. We also compare each window with the same fortnight a year earlier.
-\textbf{Input drift.} We compute the Population Stability Index (PSI)
-\cite{yurdakul2018} for each non-calendar input, measuring how much the
+
+\textbf{Input drift.} We compute the PSI \cite{yurdakul2018} for each
+non-calendar input, measuring how much the
 spread of its values has shifted compared with the same 14 days one year
-earlier (0 means no shift). We average the eight inputs' PSI values to
+earlier (0 means no shift). We average these PSI values to
 give one PSI per window, and also flag any single input at or above
-0.25, a commonly used cut off \cite{yurdakul2018}.
+0.25, a commonly used cut-off \cite{yurdakul2018}.
 
 \textbf{Warning rule.} We treat the eight baseline windows as normal
 behaviour. For each of $\tau_w$, MAE and PSI we take its mean and

@@ -11,17 +11,24 @@
 % Refer to the figures as Fig.~\ref{fig:seasonal} and Fig.~\ref{fig:shap}.
 % Figures are made by src/plot_paper.py from results/*.csv -- rerun it, don't edit the PDFs.
 
-\textbf{Warning dates.} Before the shock, the blind model's validation MAE
-was 15.4~\texteuro{}/MWh, against 43.5 for a naive same-hour-yesterday forecast.
-Against the October reference, $\tau_w$ first crossed its warning line in the
-window starting 25 April 2026 (Table~\ref{tab:warn}), 56 days before MAE
-(20 June) and 112 days before mean PSI (15 August). The oil model gave the
-same $\tau_w$ date, but its MAE crossed earlier (23 May), so the lead fell
-to 28 days.
+\textbf{Warning dates.} Against the October reference, $\tau_w$ first crossed
+its warning line in the window starting 25 April 2026 (Table~\ref{tab:warn}),
+56 days before MAE (20 June) and 112 days before mean PSI (15 August). The
+oil model gave the same $\tau_w$ date, but its MAE crossed earlier (23 May),
+so the lead fell to 28 days.
+
+\textbf{Robustness.} The 25 April lead does not hold up. For the blind model,
+$\tau_w$ never stayed over the line for two windows in a row, whereas MAE did
+from 4 July. Against the same fortnight a year earlier, $\tau_w$ never crossed
+for either model (Fig.~\ref{fig:seasonal}), and its $z$-score on 25 April was
+only $+0.40$ (blind) and $+0.21$ (oil) against $+2.90$ and $+3.60$ versus
+the October reference. Only the oil model's two-in-a-row result kept an early warning
+(56 days).
 
 \begin{table}[t]
   \centering
-  \caption{First window over the 2~SD line (window start date).}
+  \caption{First fortnight over the 2~SD warning line, by signal and model
+  (window start date).}
   \label{tab:warn}
   \begin{tabular}{lccc}
     \hline
@@ -35,27 +42,6 @@ to 28 days.
   \end{tabular}
 \end{table}
 
-\textbf{Robustness.} The 25 April lead does not hold up. For the blind model,
-$\tau_w$ never stayed over the line for two windows in a row, whereas MAE did
-from 4 July. Against the same fortnight a year earlier, $\tau_w$ never crossed
-for either model (Fig.~\ref{fig:seasonal}), and its $z$-score on 25 April was
-only $+0.40$ (blind) against $+2.90$ versus the October reference. Only the
-oil model's two-in-a-row result kept an early warning (56 days).
-
-\textbf{What moved.} MAE rose steadily after June, reaching $+6.4$ SD by
-26 September, while $\tau_w$ stayed mostly within 2~SD. The explanations did
-change in size. Yesterday's price (\texttt{price\_lag\_1d}) went from fourth
-in the October ranking, with a mean $|$SHAP$|$ of 11.3~\texteuro{}/MWh, to first
-in the last window at 35.3 (Fig.~\ref{fig:shap}). It was in the top two in
-none of the eight baseline windows and in 9 of 16 windows after the shock.
-Against the same fortnights of 2025 it was top two in 3 of 16, and its
-largest 2025 value was 14.7. The oil model shows the same pattern (8 of 16
-after, 1 of 16 in 2025, peak 34.5).
-
-\textbf{Input drift.} Mean PSI crossed its line after MAE for both models. A
-single input reached the 0.25 PSI cut-off in the very first test window
-(28 February).
-
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{tau_seasonal.pdf}
@@ -66,6 +52,16 @@ single input reached the 0.25 PSI cut-off in the very first test window
   \label{fig:seasonal}
 \end{figure}
 
+\textbf{What moved.} MAE rose steadily after June, reaching $+6.4$ SD by
+26 September, while $\tau_w$ stayed mostly within 2~SD. The explanations did
+change in size. Yesterday's price (\texttt{price\_lag\_1d}) went from fourth
+in the October ranking, with a mean $|$SHAP$|$ of 11.3~EUR/MWh, to first
+in the last window at 35.3 (Fig.~\ref{fig:shap}). It was in the top two in
+none of the eight baseline windows and in 9 of 16 windows after the shock.
+Against the same fortnights of 2025 it was top two in 3 of 16, and its
+largest 2025 value was 14.7. The oil model shows the same pattern (8 of 16
+after, 1 of 16 in 2025, peak 34.5).
+
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{shap_top4.pdf}
@@ -74,3 +70,7 @@ single input reached the 0.25 PSI cut-off in the very first test window
   month.}
   \label{fig:shap}
 \end{figure}
+
+\textbf{Input drift.} Mean PSI crossed its line after MAE for both models. A
+single input reached the 0.25 PSI cut-off in the very first test window
+(28 February).
