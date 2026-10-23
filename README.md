@@ -22,7 +22,7 @@ explains the model, not the market.
 
 | | |
 | --- | --- |
-| Paper (latest version) | [`report/main.tex`](report/main.tex), one file per section in [`report/sections/`](report/sections/) |
+| Paper (final) | [`report/CS4437_Group8_Paper.pdf`](report/CS4437_Group8_Paper.pdf), LaTeX source in [`report/main.tex`](report/main.tex) |
 | Journal | [`journal/`](journal/), indexed below |
 | Presentation (12 Oct) | [`presentation/XAI_Presentation_Group8.pdf`](presentation/XAI_Presentation_Group8.pdf) |
 | Results | [`results/summary.md`](results/summary.md), [`results/seasonal_check.md`](results/seasonal_check.md) |
