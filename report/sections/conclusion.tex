@@ -4,12 +4,13 @@ is fragile, however. When two windows in a row are required, the blind
 model's $\tau_w$ never warns while its error does, and $\tau_w$ measured
 against the same fortnight a year earlier never crosses for either model,
 suggesting much of the early movement was seasonal. Rank-based explanation drift is therefore not yet a reliable early warning
-here. The explanations changed more in scale than in order: attribution to
-yesterday's price tripled while the same four features stayed on top.
+here. The explanations changed more in scale than in order. Attribution to
+yesterday's price tripled while the same four features stayed on top, growth
+that a rank-based measure cannot register.
 
 Our study has clear limits. It covers one event, one market and one model type (gradient-boosted
 trees), so the results may not generalise. The models are frozen, so we
 cannot say how monitoring interacts with retraining. The thresholds rest on only eight baseline windows. We used only TreeSHAP
-with a mean-$|$SHAP$|$ ranking; other explainers may differ.
+with a mean-$|$SHAP$|$ ranking. Other explainers may differ.
 Future work should test magnitude-aware drift measures, use seasonally
 matched references by default, and study monitoring alongside retraining.
